@@ -6,6 +6,7 @@ using namespace std;
 
 int main()
 {
+    cout << "-------------------------" << endl;
     DS::CBTree<int,DS::functors::GreaterThan<int>> myTree;
 
     myTree.insert( 63 );
@@ -15,49 +16,53 @@ int main()
     myTree.insert( 48 );
     myTree.insert( 69 );
     myTree.insert( 83 );
+    myTree.insert( 20 );
+    myTree.insert( 40 );
+    myTree.insert( 55 );
+    myTree.insert( 17 );
+    myTree.insert( 25 );
+
+    cout << "inorder-recursive" << endl;
 
     myTree.inOrderTraverse();
 
-    cout << "---- iterators" << endl;
-
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::in_order_iterator itFoo;
+    cout << "inorder-iterators" << endl;
     
-    for( itFoo = myTree.begin(); itFoo != myTree.end(); ++itFoo )
-    {
-        std::cout << ( *itFoo ).data << std::endl;
-    }
-
-    cout << "----" << endl;
-
-    myTree.erase( 63 );
-
-    myTree.inOrderTraverse();
-
-    cout << "----" << endl;
-
-    DS::CBTree<int,DS::functors::GreaterThan<int>> myTree2;
-
-    myTree2.insert( 63 );
-    myTree2.insert( 35 );
-    myTree2.insert( 72 );
-    myTree2.insert( 15 );
-    myTree2.insert( 48 );
-    myTree2.insert( 69 );
-    myTree2.insert( 83 );
-    myTree2.insert( 40 );
-    myTree2.insert( 55 );
-
-    myTree2.inOrderTraverse();
-
-    cout << "---- iterators" << endl;
-
     DS::CBTree<int,DS::functors::GreaterThan<int>>::in_order_iterator it;
     
-    for( it = myTree2.begin(); it != myTree2.end(); ++it )
+    for( it = myTree.in_begin(); it != myTree.in_end(); ++it )
     {
-        std::cout << ( *it ).data << std::endl;
+        cout << ( *it ).data << endl;
     }
     
+    cout << "preorder-recursive" << endl;
+
+    myTree.preOrderTraverse();
+
+    cout << "preorder-iterators" << endl;
+
+    DS::CBTree<int,DS::functors::GreaterThan<int>>::pre_order_iterator it2;
+
+    for( it2 = myTree.pre_begin(); it2 != myTree.pre_end(); ++it2 )
+    {
+        cout << ( *it2 ).data << endl;
+    }
+    
+    cout << "postorder-recursive" << endl;
+
+    myTree.postOrderTraverse();
+
+    cout << "postorder-iterators" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int>>::post_order_iterator it3;
+
+    it3 = myTree.post_begin();
+    it3.consume();
+
+    //for( it3 = myTree.post_begin(); it2 != myTree.post_end(); ++it3 )
+    //{
+    //    cout << ( *it3 ).data << endl;
+    //}
 
     return 0;
 }
