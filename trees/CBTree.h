@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <vector>
 #include <iostream>
 #include <cstddef>
 
@@ -9,6 +10,8 @@
 #include "CBTreePreOrderIterator.h"
 #include "CBTreeInOrderIterator.h"
 #include "CBTreePostOrderIterator.h"
+
+using namespace std;
 
 namespace DS
 {
@@ -73,9 +76,9 @@ namespace DS
         CBNode<T>* m_root;
         FunctorType m_comp;
         void findReplace( CBNode<T>** &p, CBNode<T>** &q );
-        void inOrder( const CBNode<T>* pNode );
-        void preOrder( const CBNode<T>* pNode );
-        void postOrder( const CBNode<T>* pNode );
+        void inOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
+        void preOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
+        void postOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
 
         public :
 
@@ -169,9 +172,9 @@ namespace DS
         bool find( T x, CBNode<T>** &p );
         bool insert( T x );
         bool erase( T x );
-        void inOrderTraverse();
-        void preOrderTraverse();
-        void postOrderTraverse();
+        void inOrderTraverse( vector<int>* pBuff = nullptr );
+        void preOrderTraverse( vector<int>* pBuff = nullptr );
+        void postOrderTraverse( vector<int>* pBuff = nullptr );
     };
 
 }
@@ -247,79 +250,121 @@ void DS::CBTree<T,FunctorType>::findReplace( CBNode<T>** &p, CBNode<T>** &q )
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::inOrderTraverse()
+void DS::CBTree<T,FunctorType>::inOrderTraverse( vector<int>* pBuff )
 {
     if ( m_root == nullptr )
     {
         return;
     }
 
-    inOrder( m_root->children[0] );
-    std::cout << m_root->data << std::endl;
-    inOrder( m_root->children[1] );
+    inOrder( m_root->children[0], pBuff );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( m_root->data );
+    }
+    else
+    {
+        std::cout << m_root->data << std::endl;
+    }
+    inOrder( m_root->children[1], pBuff );
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::inOrder( const CBNode<T>* pNode )
+void DS::CBTree<T,FunctorType>::inOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
     if ( pNode == nullptr )
     {
         return;
     }
 
-    inOrder( pNode->children[0] );
-    std::cout << pNode->data << std::endl;
-    inOrder( pNode->children[1] );
+    inOrder( pNode->children[0], pBuff );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( pNode->data );
+    }
+    else
+    {
+        std::cout << pNode->data << std::endl;
+    }
+    inOrder( pNode->children[1], pBuff );
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::preOrderTraverse()
+void DS::CBTree<T,FunctorType>::preOrderTraverse( vector<int>* pBuff )
 {
     if ( m_root == nullptr )
     {
         return;
     }
 
-    std::cout << m_root->data << std::endl;
-    preOrder( m_root->children[0] );
-    preOrder( m_root->children[1] );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( m_root->data );
+    }
+    else
+    {
+        std::cout << m_root->data << std::endl;
+    }
+    preOrder( m_root->children[0], pBuff );
+    preOrder( m_root->children[1], pBuff );
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::preOrder( const CBNode<T>* pNode )
+void DS::CBTree<T,FunctorType>::preOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
     if ( pNode == nullptr )
     {
         return;
     }
 
-    std::cout << pNode->data << std::endl;
-    preOrder( pNode->children[0] );
-    preOrder( pNode->children[1] );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( pNode->data );
+    }
+    else
+    {
+        std::cout << pNode->data << std::endl;
+    }
+    preOrder( pNode->children[0], pBuff );
+    preOrder( pNode->children[1], pBuff );
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::postOrderTraverse()
+void DS::CBTree<T,FunctorType>::postOrderTraverse( vector<int>* pBuff )
 {
     if ( m_root == nullptr )
     {
         return;
     }
 
-    postOrder( m_root->children[0] );
-    postOrder( m_root->children[1] );
-    std::cout << m_root->data << std::endl;
+    postOrder( m_root->children[0], pBuff );
+    postOrder( m_root->children[1], pBuff );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( m_root->data );
+    }
+    else
+    {
+        std::cout << m_root->data << std::endl;
+    }
 }
 
 template<class T, class FunctorType>
-void DS::CBTree<T,FunctorType>::postOrder( const CBNode<T>* pNode )
+void DS::CBTree<T,FunctorType>::postOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
     if ( pNode == nullptr )
     {
         return;
     }
 
-    postOrder( pNode->children[0] );
-    postOrder( pNode->children[1] );
-    std::cout << pNode->data << std::endl;
+    postOrder( pNode->children[0], pBuff );
+    postOrder( pNode->children[1], pBuff );
+    if ( pBuff != nullptr )
+    {
+        pBuff->push_back( pNode->data );
+    }
+    else
+    {
+        std::cout << pNode->data << std::endl;
+    }
 }

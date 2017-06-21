@@ -32,35 +32,46 @@ namespace DS
             
             if ( ( this->m_stack.top() ).state == StackNode<T>::STAY )
             {
-                StackNode<T>& _top = this->m_stack.top();
-                _top.state = StackNode<T>::VISIT_RIGHT;
-                if ( _top.node->children[1] == nullptr )
+                this->m_stack.pop();
+                if ( this->m_stack.size() == 0 )
                 {
-                    _top.state = StackNode<T>::BACK;
-                    // In this state, just pop it
-                    this->m_stack.pop();
-                    // If the node on top is a type 2 node, we have already visited ...
-                    // all its subtree
-                    if ( ( this->m_stack.top() ).state == StackNode<T>::VISIT_RIGHT )
+                    return *this;
+                }
+
+                StackNode<T>& _top = this->m_stack.top();
+
+                if ( _top.state == StackNode<T>::VISIT_LEFT )
+                {
+                    _top.state = StackNode<T>::VISIT_RIGHT;
+                    if ( _top.node->children[1] != nullptr )
                     {
-                        while( this->m_stack.size() != 0 && ( this->m_stack.top() ).state == StackNode<T>::VISIT_RIGHT )
+                        this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, _top.node->children[1] ) );
+                        while ( ( this->m_stack.top() ).node->children[0] != nullptr || 
+                                ( this->m_stack.top() ).node->children[1] != nullptr )
                         {
-                            ( this->m_stack.top() ).state = StackNode<T>::BACK;// Just to remember, should not do this
-                            this->m_stack.pop();
+                            if ( ( this->m_stack.top() ).node->children[0] != nullptr )
+                            {
+                                ( this->m_stack.top() ).state = StackNode<T>::VISIT_LEFT;
+                                this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 
+                                                                  ( this->m_stack.top() ).node->children[0] ) );
+                            }
+                            else
+                            {
+                                ( this->m_stack.top() ).state = StackNode<T>::VISIT_RIGHT;
+                                this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 
+                                                                  ( this->m_stack.top() ).node->children[1] ) );
+                            }
                         }
+                        ( this->m_stack.top() ).state = StackNode<T>::STAY;
+                    }
+                    else
+                    {
+                        _top.state = StackNode<T>::STAY;
                     }
                 }
-                else
+                else if ( _top.state == StackNode<T>::VISIT_RIGHT )
                 {
-                    CBNode<T>* pToNode = _top.node->children[1];
-                    this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                    while ( pToNode->children[0] != nullptr )
-                    {
-                        pToNode = pToNode->children[0];
-                        ( this->m_stack.top() ).state = StackNode<T>::STAY;
-                        this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                    }
-                    ( this->m_stack.top() ).state = StackNode<T>::STAY;
+                    _top.state = StackNode<T>::STAY;
                 }
             }
 
