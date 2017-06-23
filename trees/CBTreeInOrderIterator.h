@@ -41,8 +41,6 @@ namespace DS
                 _top.state = StackNode<T>::VISIT_RIGHT;
                 if ( _top.node->children[1] == nullptr )
                 {
-                    _top.state = StackNode<T>::BACK;
-                    // In this state, just pop it
                     this->m_stack.pop();
                     // If the node on top is a type 2 node, we have already visited ...
                     // all its subtree
@@ -50,7 +48,6 @@ namespace DS
                     {
                         while( this->m_stack.size() != 0 && ( this->m_stack.top() ).state == StackNode<T>::VISIT_RIGHT )
                         {
-                            ( this->m_stack.top() ).state = StackNode<T>::BACK;// Just to remember, should not do this
                             this->m_stack.pop();
                         }
                     }

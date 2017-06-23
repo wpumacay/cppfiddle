@@ -57,7 +57,7 @@ namespace DS
             return *this;
         }
 
-        CListIterator<T>& operator++( int dummy )
+        CListIterator<T> operator++( int dummy )
         {
             CListIterator<T> clone( *this );
             if ( m_nodeRef )

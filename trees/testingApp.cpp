@@ -11,22 +11,6 @@ int main()
     cout << "-------------------------" << endl;
     DS::CBTree<int,DS::functors::GreaterThan<int>> myTree;
 
-    /*
-    myTree.insert( 63 );
-    myTree.insert( 35 );
-    myTree.insert( 72 );
-    myTree.insert( 15 );
-    myTree.insert( 48 );
-    myTree.insert( 69 );
-    myTree.insert( 83 );
-    myTree.insert( 20 );
-    myTree.insert( 40 );
-    myTree.insert( 55 );
-    myTree.insert( 17 );
-    myTree.insert( 25 );
-    */
-
-    
     myTree.insert( 84 );
     myTree.insert( 87 );
     myTree.insert( 78 );
@@ -86,21 +70,20 @@ int main()
     
     for( it3 = myTree.post_begin(); it3 != myTree.post_end(); ++it3 )
     {
-        /// itDummy = it3;
         cout << ( *it3 ).data << endl;
-        /// itDummy.consume();
-        /// cin.get();
     }
 
     
+    // TEST CASE FOR RANDOM GENERATED TREES *******************************************************
+    // Replace "false" for "true" to test it
     while( true )
     {
         DS::CBTree<int,DS::functors::GreaterThan<int>> _tree;
         int q;
         vector<int> _nums;
-        for( q = 0; q < 20; q++ )
+        for( q = 0; q < 40; q++ )
         {
-            int _num = rand() % 100 + 1;
+            int _num = rand() % 400 + 1;
             _tree.insert( _num );
             _nums.push_back( _num );
         }
