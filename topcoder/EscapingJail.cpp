@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define PSEUDO_INFINITY 1000000
+
 class EscapingJail
 {
 
@@ -41,7 +43,7 @@ class EscapingJail
                     char _chr_cost = chain[i][j];
                     if ( _chr_cost == ' ' )
                     {
-                        _cost_i_j = std::numeric_limits<int>::infinity();
+                        _cost_i_j = PSEUDO_INFINITY;
                     }
                     else if ( _chr_cost <= '9' && _chr_cost >= '0' )
                     {
@@ -96,7 +98,7 @@ class EscapingJail
 
     int getMaxLinkDistance( vector<int> conn_options, const int &pivot1, const int &pivot2, const int &pivots_dist )
     {
-        int _result = std::numeric_limits<int>::infinity();
+        int _result = PSEUDO_INFINITY;
         if ( conn_options.size() == 1 )
         {
             return getCost( pivot1, conn_options[0] ) + getCost( conn_options[0], pivot2 );
@@ -125,7 +127,7 @@ class EscapingJail
             }
 
             int _max_link_res = std::min( _result_1, _result_2 );
-            _result = std::min( pivots_dist, _max_link_res );
+            _result = std::min( _result, std::min( pivots_dist, _max_link_res ) );
         }
 
         return _result;
@@ -134,12 +136,17 @@ class EscapingJail
     int getMaxDistance( const vector<string> &chain )
     {
         int _result = 0;
+        int p1, p2;
         initializeGraphMatrix( chain );
         for ( int x = 0; x < m_numVerts; x++ )
         {
             for ( int y = x + 1; y < m_numVerts; y++ )
             {
                 int _max_dist = getCost( x, y );
+                if ( x == 2 && y == 3 )
+                {
+                    cout << "? " << _max_dist << endl;
+                }
                 vector<int> _conn_options;
                 for ( int q = 0; q < m_numVerts; q++ )
                 {
@@ -150,15 +157,33 @@ class EscapingJail
                     _conn_options.push_back( q );
                 }
 
-                int _max_link_dist = getMaxLinkDistance( _conn_options, x, y, getCost( x, y ) );
-                _max_dist = std::min( _max_dist, _max_link_dist );
-                _result = std::max( _max_dist, _result );
+                
+                if ( _conn_options.size() > 0 )
+                {
+                    if ( x == 2 && y == 3 )
+                    {
+                        cout << "here" << endl;
+                    }
+                    int _max_link_dist = getMaxLinkDistance( _conn_options, x, y, getCost( x, y ) );
+                    if ( x == 2 && y == 3 )
+                    {
+                        cout << "?? " << _max_link_dist << endl;
+                    }
+                    _max_dist = std::min( _max_dist, _max_link_dist );
+                }
+                if ( _result < _max_dist )
+                {
+                    p1 = x;
+                    p2 = y;
+                    _result = _max_dist;
+                }
             }
         }
-        if ( _result == std::numeric_limits<int>::infinity() )
+        if ( _result == PSEUDO_INFINITY )
         {
             _result = -1;
         }
+        cout << "pair: " << p1 << " - " << p2 << endl;
 
         return _result;
     }
@@ -166,18 +191,18 @@ class EscapingJail
     void printCosts()
     {
         int i,j;
-        cout << "costs: ";
+        cout << "costs: " << endl;
         for ( i = 0; i < m_numVerts; i++ )
         {
             for ( j = i + 1; j < m_numVerts; j++ )
             {
-                if ( getCost( i, j ) == std::numeric_limits<int>::infinity() )
+                if ( getCost( i, j ) == PSEUDO_INFINITY )
                 {
-                    cout << "Inf" << " ";
+                    cout << "c " << i << "-" << j << " : " << "Inf" << endl;
                 }
                 else
                 {
-                    cout << getCost( i, j ) << " ";
+                    cout << "c " << i << "-" << j << " : " << getCost( i, j ) << endl;
                 }
             }
         }
@@ -194,8 +219,8 @@ int main()
 {
     // string _chain[] = {"0568", "5094", "6903", "8430"};
     // string _chain[] = {"0 ", " 0"};
-    // string _chain[] = {"0AxHH190", "A00f3AAA", "x00 ", "Hf 0 x ", "H3 0 ", "1A 0 ", "9A x 0Z", "0A Z0"};
-    string _chain[] = {"00", "00"};
+    string _chain[] = {"0AxHH190", "A00f3AAA", "x00     ", "Hf 0 x  ", "H3 0    ", "1A 0    ", "9A x 0Z ", "0A Z0   "};
+    // string _chain[] = {"00", "00"};
     vector<string> _test_chain( _chain, _chain + sizeof( _chain ) / sizeof( _chain[0] ) );
 
     EscapingJail _prob;
