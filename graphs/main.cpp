@@ -42,7 +42,8 @@ int main()
 
 	_graph.print();
 
-	_graph.removeEdge( _graph.nodes[0].edges[0] );
+	_graph.removeEdge( _graph.nodes[0]->edges[0] );
+	_graph.removeEdge( _graph.nodes[1]->edges[0] );
 
 	_graph.print();
 

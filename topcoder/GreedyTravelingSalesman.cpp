@@ -7,6 +7,19 @@
 
 using namespace std;
 
+struct Pair
+{
+	int indx;
+	int cost;
+};
+
+
+bool compare( Pair p1, Pair p2 )
+{
+	return p1.cost < p2.cost;
+}
+
+
 class GreedyTravelingSalesman
 {
 
@@ -65,13 +78,13 @@ class GreedyTravelingSalesman
 		{
 			int _result = 0;
 			int _bestChoiceIndx = 0;
+			std::sort( choices.begin(), choices.end() );
 			int _bestDist = getMinDistance( startIndx, choices, _bestChoiceIndx );
 			int _bestDecision = choices[_bestChoiceIndx];
 			choices.erase( choices.begin() + _bestChoiceIndx );
 			_result = _bestDist + getWorstDistance( _bestDecision, false, choices );
 
-			cout << "res: " << _result << " " << choices.size() + 1 << endl;
-			cout << "f: " << _bestDist << endl;
+			/// cout << "result: " << _result << endl;
 
 			return _result;
 		}
@@ -80,11 +93,33 @@ class GreedyTravelingSalesman
 		{
 			int _result = 0;
 			int _firstMinIndx = 0;
+			std::sort( choices.begin(), choices.end() );
 			int _firstMinDist = getMinDistance( startIndx, choices, _firstMinIndx );
 			int _firstDecision = choices[_firstMinIndx];
 			int _secondMinIndx = 0;
 			int _secondMinDist = getSecondMinDistance( startIndx, choices, _secondMinIndx );
 			int _secondDecision = choices[_secondMinIndx];
+
+			int _thirdMinIndx = -1;
+			int _thirdMinDist = -1;
+			int _thirdDecision = -1;
+
+				if ( _firstMinDist == _secondMinDist )
+				{
+					cout << "?????" << choices.size() << endl;
+					cout << "--" << _firstMinDist << endl;
+					cout << "-" << _firstDecision << "-" << _secondDecision << endl;
+				}
+
+			if ( choices.size() > 2 )
+			{
+				_thirdMinDist = getNthMinDistance( startIndx, choices, _thirdMinIndx, 2 );
+				_thirdDecision = choices[_thirdMinIndx];
+				if ( _thirdMinDist == _secondMinDist )
+				{
+					cout << "?????" << endl;
+				}
+			}
 
 			int _res1, _res2, _res3, _res4;
 			vector<int> _ch1( choices ),_ch2( choices ),_ch3( choices ),_ch4( choices );
@@ -99,14 +134,34 @@ class GreedyTravelingSalesman
 			_res3 = _secondMinDist + getWorstDistance( _firstDecision, false, _ch3 );
 			_res4 = _secondMinDist + getWorstDistance( _secondDecision, false, _ch4 );
 			_res3 = _secondDecision > _firstDecision ? _res3 : 0;
-			cout << "res: " << _res1 << " " << _res2 << " " << _res3 << " " << _res4 << endl;
-			cout << "f: " << _firstMinDist << " " << _secondMinDist - 1 << " " << _secondMinDist << " " << _secondMinDist << endl;
+
+			// extra case, what happens if all other decisions change to 1 less than the actual min
+			int _res_extra = 0;
+			for ( int p = 0; p < choices.size(); p++ )
+			{
+				if ( p == _firstMinIndx || p == _secondMinIndx )
+				{
+					continue;
+				}
+
+				vector<int> _choices_ext( choices );
+				int _decision_ext = choices[p];
+				_choices_ext.erase( _choices_ext.begin() + p );
+				int _res = _firstMinDist + getWorstDistance( _decision_ext, false, _choices_ext );
+				_res_extra = std::max( _res_extra, _res );
+			}
+
+			// cout << "res: " << _res1 << " " << _res2 << " " << _res3 << " " << _res4 << endl;
+			// cout << "f: " << _firstMinDist << " " << _secondMinDist - 1 << " " << _secondMinDist << " " << _secondMinDist << endl;
 			_result = std::max( _res1, std::max( _res2, std::max( _res3, _res4 ) ) );
+			_result = std::max( _result, _res_extra );
+
+			/// cout << "result: " << _result << endl;
 
 			return _result;
 		}
 		
-		cout << 9999 << endl;
+		
 		return 9999;
 	}
 
@@ -131,6 +186,22 @@ class GreedyTravelingSalesman
 		int _firstMinIndx = 0;
 		int _firstMinDist = getMinDistance( indxFrom, choices, _firstMinIndx );
 
+		//vector<Pair> _options;
+		//for ( unsigned int q = 0; q < choices.size(); q++ )
+		//{
+		//	Pair _p;
+		//	_p.indx = q;
+		//	_p.cost = getCost( indxFrom, choices[q] );
+		//	_options.push_back( _p );
+		//}
+
+		//std::sort( _options.begin(), _options.end(), compare );
+
+		//choiceIndx = _options[1].indx;
+		//return _options[1].cost;
+
+
+
 		int _secondMinDist = 1000000;
 		unsigned int q;
 		for( q = 0; q < choices.size(); q++ )
@@ -144,6 +215,23 @@ class GreedyTravelingSalesman
 		}
 
 		return _secondMinDist;
+	}
+
+	int getNthMinDistance( int indxFrom, vector<int> choices, int &choiceIndx, int pos )
+	{
+		vector<Pair> _options;
+		for ( unsigned int q = 0; q < choices.size(); q++ )
+		{
+			Pair _p;
+			_p.indx = q;
+			_p.cost = getCost( indxFrom, choices[q] );
+			_options.push_back( _p );
+		}
+
+		std::sort( _options.begin(), _options.end(), compare );
+
+		choiceIndx = _options[pos].indx;
+		return _options[pos].cost;		
 	}
 
 	public :
@@ -172,6 +260,7 @@ class GreedyTravelingSalesman
 		int _result = 0;
 
 		int n_verts = thousands.size();
+		cout << "verts: " << n_verts << endl;
 		initializeGraphMatrix( n_verts, thousands, hundreds, tens, ones );
 
 		vector<int> choices;

@@ -7,8 +7,8 @@ namespace DS
 {
 
 
-    template<class T, class FunctorType>
-    class CBTreeInOrderIterator : public CBTreeIterator<T,FunctorType>
+    template<class T>
+    class CBTreeInOrderIterator : public CBTreeIterator<T>
     {
 
         public :
@@ -18,7 +18,7 @@ namespace DS
             
         }
 
-        CBTreeInOrderIterator( const CBTreeInOrderIterator<T,FunctorType>& other )
+        CBTreeInOrderIterator( const CBTreeInOrderIterator<T>& other )
         {
             this->m_stack = other.m_stack;
         }
@@ -28,7 +28,7 @@ namespace DS
             this->m_stack = pStack;
         }
 
-        CBTreeInOrderIterator<T,FunctorType>& operator++()
+        CBTreeInOrderIterator<T>& operator++()
         {
             if ( this->m_stack.size() == 0 )
             {

@@ -73,10 +73,40 @@ int main()
         cout << ( *it3 ).data << endl;
     }
 
+    cout << "general iterators******" << endl;    
+
+    cout << "in order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_in_order_iterator _g_it_1;
+
+    for( _g_it_1 = myTree.g_in_begin(); _g_it_1 != myTree.g_in_end(); ++_g_it_1 )
+    {
+        cout << ( *_g_it_1 ).data << endl;
+    }
+
+    cout << "pre order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_pre_order_iterator _g_it_2;
+
+    for( _g_it_2 = myTree.g_pre_begin(); _g_it_2 != myTree.g_pre_end(); ++_g_it_2 )
+    {
+        cout << ( *_g_it_2 ).data << endl;
+    }
+
+    cout << "post order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_post_order_iterator _g_it_3;
+
+    for( _g_it_3 = myTree.g_post_begin(); _g_it_3 != myTree.g_post_end(); ++_g_it_3 )
+    {
+        cout << ( *_g_it_3 ).data << endl;
+    }
+
+    cout << "general iterators******" << endl;        
     
     // TEST CASE FOR RANDOM GENERATED TREES *******************************************************
     // Replace "false" for "true" to test it
-    while( true )
+    while( false )
     {
         DS::CBTree<int,DS::functors::GreaterThan<int>> _tree;
         int q;

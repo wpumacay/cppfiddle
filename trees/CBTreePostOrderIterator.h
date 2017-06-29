@@ -5,15 +5,15 @@
 
 namespace DS
 {
-    template<class T, class FunctorType>
-    class CBTreePostOrderIterator : public CBTreeIterator<T,FunctorType>
+    template<class T>
+    class CBTreePostOrderIterator : public CBTreeIterator<T>
     {
 
         public :
 
         CBTreePostOrderIterator(){}
 
-        CBTreePostOrderIterator( const CBTreePostOrderIterator<T,FunctorType>& other )
+        CBTreePostOrderIterator( const CBTreePostOrderIterator<T>& other )
         {
             this->m_stack = other.m_stack;
         }
@@ -23,7 +23,7 @@ namespace DS
             this->m_stack = pStack;
         }
 
-        CBTreePostOrderIterator<T,FunctorType>& operator++()
+        CBTreePostOrderIterator<T>& operator++()
         {
             if ( this->m_stack.size() == 0 )
             {
@@ -55,7 +55,7 @@ namespace DS
                                 this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 
                                                                   ( this->m_stack.top() ).node->children[0] ) );
                             }
-                            else
+                             else
                             {
                                 ( this->m_stack.top() ).state = StackNode<T>::VISIT_RIGHT;
                                 this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 

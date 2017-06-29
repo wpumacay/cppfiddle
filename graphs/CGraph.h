@@ -69,14 +69,29 @@ namespace DS
 	{
 		// Remove from the "from" node's edges
 		CNode<CGraph<N,E>>* _node_from = edge->nodes[0];
-
-		if ( edge->bidir )
+		
+		int _indx = -1;
+		for ( int q = 0; q < _node_from->edges.size(); q++ )
 		{
-			// Remove from the "to" node's edges
-			CNode<CGraph<N,E>>* _node_to = edge->nodes[1];
+			if ( _node_from->edges[q] == edge )
+			{
+				_indx = q;
+				break;
+			}
+		}
+		
+		if ( _indx != -1 )
+		{
+			_node_from->edges.erase( _node_from->edges.begin() + _indx );
 		}
 
 		delete edge;
+	}
+
+	template<class N, class E>
+	void CGraph<N,E>::removeNode( CNode<CGraph<N,E>>* node )
+	{
+		
 	}
 
 
@@ -87,11 +102,11 @@ namespace DS
 		for ( int q = 0; q < nodes.size(); q++ )
 		{
 			cout << " node ( " << nodes[q]->data << " ): ";
-			vector<CEdge<CGraph<N,E>>*> _vect_for_node = nodes[q]->edges;
+			vector<CEdge<CGraph<N,E>>*> _node_edges = nodes[q]->edges;
 			
-			for ( int p = 0; p < _vect_for_node.size(); p++ )
+			for ( int p = 0; p < _node_edges.size(); p++ )
 			{
-				cout << ( _vect_for_node[p]->nodes[1] )->data << "(" << _vect_for_node[p]->data << ") ";
+				cout << ( _node_edges[p]->nodes[1] )->data << "(" << _node_edges[p]->data << ") ";
 			}
 			cout << endl;
 		}

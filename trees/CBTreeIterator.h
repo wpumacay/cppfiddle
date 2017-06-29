@@ -38,7 +38,7 @@ namespace DS
         return ( p1.node == p2.node ) && ( p1.state == p2.state );
     }
 
-    template<class T, class FunctorType>
+    template<class T>
     class CBTreeIterator
     {
 
@@ -58,12 +58,12 @@ namespace DS
             m_stack = pStack;
         }
 
-        CBTreeIterator( const CBTreeIterator<T,FunctorType>& other )
+        CBTreeIterator( const CBTreeIterator<T>& other )
         {
             m_stack = other.m_stack;
         }
 
-        CBTreeIterator<T,FunctorType>& operator=( const CBTreeIterator<T,FunctorType>& other )
+        CBTreeIterator<T>& operator=( const CBTreeIterator<T>& other )
         {
             m_stack = other.m_stack;
         }
@@ -73,9 +73,9 @@ namespace DS
             return *( ( m_stack.top() ).node );
         }
 
-        virtual CBTreeIterator<T,FunctorType>& operator++() = 0;
+        virtual CBTreeIterator<T>& operator++() = 0;
 
-        bool operator!=( const CBTreeIterator<T,FunctorType>& other )
+        bool operator!=( const CBTreeIterator<T>& other )
         {
             return m_stack != other.m_stack;
         }

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include <string>
 
@@ -11,19 +12,16 @@ struct Node
 {
 	int vert;
 	int cost;
+	bool visited;
+
 	Node( int vert, int cost )
 	{
 		this->vert = vert;
 		this->cost = cost;
+		this->visited = false;
 	}
 };
 
-struct TimeTravelExploration
-{
-	long long cost;
-	vector<int> explored;
-	vector<int> fringe;
-};
 
 class TimeTravellingSalesman
 {
@@ -97,57 +95,6 @@ class TimeTravellingSalesman
 
 	public :
 
-	TimeTravelExploration time_travel_visit( TimeTravelExploration current_exp, int previous_indx )
-	{
-		TimeTravelExploration _exp;
-		_exp.fringe = current_exp.fringe;
-		_exp.explored = current_exp.explored;
-		_exp.cost = current_exp.cost;
-
-		if ( _exp.fringe.size() == 0 )
-		{
-			return _exp;
-		}
-
-		for ( int q = 0; q < _exp.fringe.size(); q++ )
-		{
-			int _to_explore = _exp.fringe[q];
-
-			if ( vectorIndexOf( _exp.explored, _to_explore ) != -1 )
-			{
-				continue;
-			}
-			// For all nodes in the fringe, branch
-			TimeTravelExploration _exp_q;
-			_exp_q.cost = _exp.cost;
-			if ( previous_indx != -1 )
-			{
-				_exp_q.cost += m_adjGraph[previous_indx][_to_explore].cost;
-			}
-
-			_exp_q.fringe = _exp.fringe;
-			_exp_q.explored = _exp.explored;
-			_exp_q.explored.push_back( _exp_q.fringe[q] );
-			_exp_q.fringe.erase( _exp_q.fringe.begin() + q );
-			for ( int p = 0; p < m_adjGraph[_to_explore].size(); p++ )
-			{
-				_exp_q.fringe.push_back( m_adjGraph[_to_explore][p].vert );
-			}
-
-			TimeTravelExploration _sub_exploration = time_travel_visit( _exp_q, _to_explore );
-
-			// merge the branch explorations
-			for ( int r = 0; r < _sub_exploration.explored.size(); r++ )
-			{
-				_exp.explored.push_back( _sub_exploration.explored[r] );
-			}
-			_exp.cost += _sub_exploration.cost;
-		}
-
-
-		return _exp;
-	}
-
 	int determineCost( int verts, vector<string> roads )
 	{
 		long long _result = 0;
@@ -155,16 +102,77 @@ class TimeTravellingSalesman
 		m_numverts = verts;
 		parse_roads( roads );
 
-		vector<long long> _results;
+		vector<long long > _results;
 
 		for ( int q = 0; q < m_numverts; q++ )
 		{
-			TimeTravelExploration _exploration;
-			_exploration.cost = 0;
-			_exploration.fringe.push_back( q );
-			_exploration = time_travel_visit( _exploration, -1 );
-			_results.push_back( _exploration.cost );
+			// reset the graph
+			for ( int p = 0; p < m_numverts; p++ )
+			{
+				for ( int s = 0; s < m_adjGraph[p].size(); s++ )
+				{
+					m_adjGraph[p][s].visited = false;
+				}
+			}
+
+			long long _sub_result = 0;
+			queue<Node> _fringe;
+			vector<int> _explored;
+			vector<int> _touched;
+
+
+			Node _n( q, 0 );
+			_fringe.push( _n );
+			_touched.push_back( _n.vert );
+
+			// cout << "start: " << q << endl;
+
+			while ( !_fringe.empty() )
+			{
+				Node _t = _fringe.front();
+				_fringe.pop();
+				if ( vectorIndexOf( _explored, _t.vert ) != -1 )
+				{
+					continue;
+				}
+				_explored.push_back( _t.vert );
+
+				// cout << "  explored: " << _t.vert << endl;
+
+				if ( _explored.size() == m_numverts )
+				{
+					break;
+				}
+
+				// cin.get();
+				for ( int r = 0; r < m_adjGraph[_t.vert].size(); r++ )
+				{
+					Node _o = m_adjGraph[_t.vert][r];
+					if ( vectorIndexOf( _explored, _o.vert ) == -1 && 
+						 vectorIndexOf( _touched, _o.vert ) == -1 )
+					{
+						_fringe.push( _o );
+						_touched.push_back( _o.vert );
+						_sub_result += _o.cost;
+					}
+				}
+
+			}
+			cout << _explored.size() << endl;
+			if ( _explored.size() != m_numverts )
+			{
+				_sub_result = -1;
+			}
+
+			_results.push_back( _sub_result );
 		}
+
+		cout << "[ ";
+		for ( int r = 0; r < _results.size(); r++ )
+		{
+			cout << _results[r] << " ";
+		}
+		cout << " ]" << endl;
 
 		sort( _results.begin(), _results.end() );
 
@@ -208,21 +216,60 @@ class TimeTravellingSalesman
 
 int main()
 {
-	//int N = 3;
-	//string _arr[] = {"0,1,1 0,2,1 1,2,2"};
-	//int N = 4;
-	//string _arr[] = {"1,0",",10","0 2,1",",584 3,2",",754"};
-	int N = 6;
-	string _arr[] = {"0,1,2 1,4,2 4,3,3 2,4,4 0,5,3"};
-	vector<string> _roads( _arr, _arr + sizeof( _arr ) / sizeof( _arr[0] ) );
+	vector<int> _cases_N;
+	vector<string*> _cases_arr;
+	vector<int> _cases_sizes;
+	vector<long long > _cases_answers;
 
-	TimeTravellingSalesman _prob;
+	int N1 = 3;
+	string _arr1[] = {"0,1,1 0,2,1 1,2,2"};
+	_cases_N.push_back( N1 );
+	_cases_arr.push_back( _arr1 );
+	_cases_sizes.push_back( sizeof( _arr1 ) / sizeof( _arr1[0] ) );
+	_cases_answers.push_back( 2 );
 
-	long long _result = _prob.determineCost( N, _roads );
+	int N2 = 4;
+	string _arr2[] = {"1,0",",10","0 2,1",",584 3,2",",754"};
+	_cases_N.push_back( N2 );
+	_cases_arr.push_back( _arr2 );
+	_cases_sizes.push_back( sizeof( _arr2 ) / sizeof( _arr2[0] ) );
+	_cases_answers.push_back( 1438 );
 
-	_prob.print();
+	int N3 = 3;
+	string _arr3[] = {"0,2,2"};
+	_cases_N.push_back( N3 );
+	_cases_arr.push_back( _arr3 );
+	_cases_sizes.push_back( sizeof( _arr3 ) / sizeof( _arr3[0] ) );
+	_cases_answers.push_back( -1 );
 
-	cout << "result: " << _result << endl;
+	int N4 = 6;
+	string _arr4[] = {"0,1,2 1,4,2 4,3,3 2,4,4 0,5,3"};
+	_cases_N.push_back( N4 );
+	_cases_arr.push_back( _arr4 );
+	_cases_sizes.push_back( sizeof( _arr4 ) / sizeof( _arr4[0] ) );
+	_cases_answers.push_back( 14 );
+
+	for ( int q = 0; q < _cases_N.size(); q++ )
+	{
+		int N = _cases_N[q];
+		vector<string> _roads( _cases_arr[q], _cases_arr[q] + _cases_sizes[q] );
+
+		TimeTravellingSalesman _prob;
+
+		long long _result = _prob.determineCost( N, _roads );
+
+		cout << "result: " << _result << endl;
+
+		if ( _result == _cases_answers[q] ) 
+		{
+			cout << "CORRECT ANSWER! :)" << endl;
+		} 
+		else
+		{
+			cout << "WRONG ANSWER :(" << endl;
+		}
+	}
+
 
 	return 0;
 }
