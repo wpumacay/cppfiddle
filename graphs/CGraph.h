@@ -31,7 +31,6 @@ namespace DS
 		void insertEdge( Node* from, Node* to, E edge_data, bool dir );
 		void removeEdge( Edge* edge );
 		void removeNode( Node* node );
-		// void removeNode( Node* node );
 
 
 		void print();
