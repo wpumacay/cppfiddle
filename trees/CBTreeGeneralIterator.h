@@ -22,193 +22,148 @@ namespace DS
             this->m_stack = other.m_stack;
         }
 
-        CBTreeGeneralIterator( std::stack<StackNode<T>> &pStack )
+        CBTreeGeneralIterator( std::stack<StackNode<T> > &pStack )
         {
             this->m_stack = pStack;
         }
 
         CBTreeGeneralIterator<T,TypeIterator>& operator++()
         {
-            return *this;
-        }
-
-    };
-    
-    template<class T>
-    class CBTreeGeneralIterator<T,PreOrder> : public CBTreeIterator<T>
-    {
-
-        public :
-
-        CBTreeGeneralIterator(){}
-
-        CBTreeGeneralIterator( const CBTreeGeneralIterator<T,PreOrder>& other )
-        {
-            this->m_stack = other.m_stack;
-        }
-
-        CBTreeGeneralIterator( std::stack<StackNode<T>> &pStack )
-        {
-            this->m_stack = pStack;
-        }
-
-        CBTreeGeneralIterator<T,PreOrder>& operator++()
-        {
             if ( this->m_stack.size() == 0 )
             {
                 return *this;
             }
 
-            StackNode<T> _top = this->m_stack.top();
-            this->m_stack.pop();
-            if ( _top.node->children[1] != nullptr )
-            {
-                this->m_stack.push( StackNode<T>( StackNode<T>::STAY, _top.node->children[1] ) );
-            }
-            if ( _top.node->children[0] != nullptr ) 
-            {
-                this->m_stack.push( StackNode<T>( StackNode<T>::STAY, _top.node->children[0] ) );
-            }
-                
-            return *this;
-        }
-
-    };
-    
-
-    template<class T>
-    class CBTreeGeneralIterator<T,InOrder> : public CBTreeIterator<T>
-    {
-
-        public :
-
-        CBTreeGeneralIterator(){}
-
-        CBTreeGeneralIterator( const CBTreeGeneralIterator<T,InOrder>& other )
-        {
-            this->m_stack = other.m_stack;
-        }
-
-        CBTreeGeneralIterator( std::stack<StackNode<T>> &pStack )
-        {
-            this->m_stack = pStack;
-        }
-
-        CBTreeGeneralIterator<T,InOrder>& operator++()
-        {
-            if ( this->m_stack.size() == 0 )
-            {
-                return *this;
-            }
-                
-            if ( ( this->m_stack.top() ).state == StackNode<T>::STAY )
+            do
             {
                 StackNode<T>& _top = this->m_stack.top();
-                _top.state = StackNode<T>::VISIT_RIGHT;
-                if ( _top.node->children[1] == nullptr )
+                switch ( _top.state )
                 {
-                    this->m_stack.pop();
-                    // If the node on top is a type 2 node, we have already visited ...
-                    // all its subtree
-                    if ( ( this->m_stack.top() ).state == StackNode<T>::VISIT_RIGHT )
-                    {
-                        while( this->m_stack.size() != 0 && ( this->m_stack.top() ).state == StackNode<T>::VISIT_RIGHT )
+                    case TypeIterator::START :
+                        _top.state = TypeIterator::STATE_VISIT_1;
+                        visitNext( _top, TypeIterator::STATE_VISIT_1 );
+                    break;
+
+                    case TypeIterator::STATE_VISIT_1 :
+                        visitNext( _top, TypeIterator::STATE_VISIT_2 );
+                    break;
+
+                    case TypeIterator::STATE_VISIT_2 :
+                        visitNext( _top, TypeIterator::STATE_VISIT_3 );
+                    break;
+
+                    case TypeIterator::STATE_VISIT_3 :
+                        visitNext( _top, TypeIterator::END );
+                    break;
+
+                    case TypeIterator::END :
+                        // GO up one level
+                        this->m_stack.pop();
+                        if ( this->m_stack.size() > 0 )
                         {
-                            this->m_stack.pop();
+                            if ( ( this->m_stack.top() ).state == TypeIterator::STATE_VISIT_1 )
+                            {
+                                ( this->m_stack.top() ).state = TypeIterator::STATE_VISIT_2;
+                            }
+                            else if ( ( this->m_stack.top() ).state == TypeIterator::STATE_VISIT_2 )
+                            {
+                                ( this->m_stack.top() ).state = TypeIterator::STATE_VISIT_3;
+                            }
+                            else if ( ( this->m_stack.top() ).state == TypeIterator::STATE_VISIT_3 )
+                            {
+                                ( this->m_stack.top() ).state = TypeIterator::END;
+                            }
                         }
+                    break;
+                }
+
+
+            } while ( ( this->m_stack.size() > 0 ) &&
+                      ( ( this->m_stack.top() ).state != StackState::STAY ) );
+
+            return *this;
+        }
+
+        void visitNext( StackNode<T> &top, StackState::_StackState nextState )
+        {
+            
+
+            if ( top.state == StackState::VISIT_LEFT || nextState == StackState::VISIT_LEFT )
+            {
+                if ( top.node->children[0] != NULL )
+                {
+                    this->m_stack.push( StackNode<T>( StackState::START, top.node->children[0] ) );
+                }
+                else
+                {
+                    if ( nextState == TypeIterator::STATE_VISIT_1 )
+                    {
+                        top.state = TypeIterator::STATE_VISIT_2;
+                    }
+                    else if ( nextState == TypeIterator::STATE_VISIT_2 )
+                    {
+                        top.state = TypeIterator::STATE_VISIT_3;
+                    }
+                    else if ( nextState == TypeIterator::STATE_VISIT_3 )
+                    {
+                        if ( nextState != StackState::STAY )
+                        {
+                            top.state = TypeIterator::END;
+                        }
+                        else
+                        {
+                            top.state = nextState;
+                        }
+                    }
+                    else if ( nextState == TypeIterator::END )
+                    {
+                        top.state = TypeIterator::END;
+                    }
+                    return;
+                }
+            }
+            else if ( top.state == StackState::VISIT_RIGHT || nextState == StackState::VISIT_RIGHT )
+            {
+                if ( top.node->children[1] != NULL )
+                {
+                    this->m_stack.push( StackNode<T>( StackState::START, top.node->children[1] ) );
+                    if ( nextState == StackState::STAY )
+                    {
+                        return;
                     }
                 }
                 else
                 {
-                    CBNode<T>* pToNode = _top.node->children[1];
-                    this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                    while ( pToNode->children[0] != nullptr )
+                    if ( nextState == TypeIterator::STATE_VISIT_1 )
                     {
-                        pToNode = pToNode->children[0];
-                        ( this->m_stack.top() ).state = StackNode<T>::STAY;
-                        this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                        top.state = TypeIterator::STATE_VISIT_2;
                     }
-                    ( this->m_stack.top() ).state = StackNode<T>::STAY;
-                }
-            }
-
-            return *this;
-        }
-    };
-
-    template<class T>
-    class CBTreeGeneralIterator<T,PostOrder> : public CBTreeIterator<T>
-    {
-
-        public :
-
-        CBTreeGeneralIterator(){}
-
-        CBTreeGeneralIterator( const CBTreeGeneralIterator<T,PostOrder>& other )
-        {
-            this->m_stack = other.m_stack;
-        }
-
-        CBTreeGeneralIterator( std::stack<StackNode<T>> &pStack )
-        {
-            this->m_stack = pStack;
-        }
-
-        CBTreeGeneralIterator<T,PostOrder>& operator++()
-        {
-            if ( this->m_stack.size() == 0 )
-            {
-                return *this;
-            }
-                
-            if ( ( this->m_stack.top() ).state == StackNode<T>::STAY )
-            {
-                this->m_stack.pop();
-                if ( this->m_stack.size() == 0 )
-                {
-                    return *this;
-                }
-
-                StackNode<T>& _top = this->m_stack.top();
-
-                if ( _top.state == StackNode<T>::VISIT_LEFT )
-                {
-                    _top.state = StackNode<T>::VISIT_RIGHT;
-                    if ( _top.node->children[1] != nullptr )
+                    else if ( nextState == TypeIterator::STATE_VISIT_2 )
                     {
-                        this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, _top.node->children[1] ) );
-                        while ( ( this->m_stack.top() ).node->children[0] != nullptr || 
-                                ( this->m_stack.top() ).node->children[1] != nullptr )
+                        top.state = TypeIterator::STATE_VISIT_3;
+                    }
+                    else if ( nextState == TypeIterator::STATE_VISIT_3 )
+                    {
+                        if ( nextState != StackState::STAY )
                         {
-                            if ( ( this->m_stack.top() ).node->children[0] != nullptr )
-                            {
-                                ( this->m_stack.top() ).state = StackNode<T>::VISIT_LEFT;
-                                this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 
-                                                                  ( this->m_stack.top() ).node->children[0] ) );
-                            }
-                             else
-                            {
-                                ( this->m_stack.top() ).state = StackNode<T>::VISIT_RIGHT;
-                                this->m_stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, 
-                                                                  ( this->m_stack.top() ).node->children[1] ) );
-                            }
+                            top.state = TypeIterator::END;
                         }
-                        ( this->m_stack.top() ).state = StackNode<T>::STAY;
+                        else
+                        {
+                            top.state = nextState;
+                        }
                     }
-                    else
+                    else if ( nextState == TypeIterator::END )
                     {
-                        _top.state = StackNode<T>::STAY;
+                        top.state = TypeIterator::END;
                     }
-                }
-                else if ( _top.state == StackNode<T>::VISIT_RIGHT )
-                {
-                    _top.state = StackNode<T>::STAY;
+                    return;
                 }
             }
 
-            return *this;
+            top.state = nextState;
         }
-    };
 
+    };
     
 }

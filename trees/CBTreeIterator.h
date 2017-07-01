@@ -10,21 +10,26 @@ namespace DS
     template<class T>
     struct CBNode;
 
-    template<class T>
-    struct StackNode
+    namespace StackState
     {
-        enum _State
+        enum _StackState
         {
+            START,
             VISIT_LEFT,
             STAY,
             VISIT_RIGHT,
             BACK
         };
+    }
 
-        _State state;
+    template<class T>
+    struct StackNode
+    {
+
+        StackState::_StackState state;
         CBNode<T>* node;
 
-        StackNode( _State pState, CBNode<T>* pNode )
+        StackNode( StackState::_StackState pState, CBNode<T>* pNode )
         {
             this->state = pState;
             this->node = pNode;
@@ -44,7 +49,7 @@ namespace DS
 
         protected :
 
-        std::stack<StackNode<T>> m_stack;
+        std::stack<StackNode<T> > m_stack;
 
         public :
 
@@ -53,7 +58,7 @@ namespace DS
             
         }
 
-        CBTreeIterator( std::stack<StackNode<T>> &pStack )
+        CBTreeIterator( std::stack<StackNode<T> > &pStack )
         {
             m_stack = pStack;
         }

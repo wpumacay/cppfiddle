@@ -6,11 +6,19 @@
 #include <iostream>
 #include <cstddef>
 
+// Base class for the iterators
 #include "CBTreeIterator.h"
+// Single classes for non-general implementations of ...
+// the iterators
 #include "CBTreePreOrderIterator.h"
 #include "CBTreeInOrderIterator.h"
 #include "CBTreePostOrderIterator.h"
+// General iterators ( second version, by ...
+// generalizing the code )
 #include "CBTreeGeneralIterator.h"
+// Gemerañ iterators ( first version, forced ...
+// to one by template specialization )
+#include "CBTreeGeneralSpecializationIterator.h"
 
 using namespace std;
 
@@ -38,21 +46,6 @@ namespace DS
         };
     }
 
-    struct InOrder
-    {
-
-    };
-
-    struct PreOrder
-    {
-
-    };
-
-    struct PostOrder
-    {
-
-    };
-
     template<class T>
     class CBTreeIterator;
 
@@ -68,8 +61,38 @@ namespace DS
     template<class T,class IteratorType>
     class CBTreeGeneralIterator;
 
+    template<class T,class IteratorType>
+    class CBTreeGeneralSpecializationIterator;
+
     template<class T>
     struct StackNode;
+
+    struct InOrder
+    {
+        static const StackState::_StackState START          = StackState::START;
+        static const StackState::_StackState STATE_VISIT_1  = StackState::VISIT_LEFT;
+        static const StackState::_StackState STATE_VISIT_2  = StackState::STAY;//visit root
+        static const StackState::_StackState STATE_VISIT_3  = StackState::VISIT_RIGHT;//visit right
+        static const StackState::_StackState END            = StackState::BACK;// back
+    };
+
+    struct PreOrder
+    {
+        static const StackState::_StackState START          = StackState::START;
+        static const StackState::_StackState STATE_VISIT_1  = StackState::STAY;//visit root
+        static const StackState::_StackState STATE_VISIT_2  = StackState::VISIT_LEFT;//visit left
+        static const StackState::_StackState STATE_VISIT_3  = StackState::VISIT_RIGHT;//visit right
+        static const StackState::_StackState END            = StackState::BACK;// back
+    };
+
+    struct PostOrder
+    {
+        static const StackState::_StackState START          = StackState::START;
+        static const StackState::_StackState STATE_VISIT_1  = StackState::VISIT_LEFT;//visit left
+        static const StackState::_StackState STATE_VISIT_2  = StackState::VISIT_RIGHT;//visit right
+        static const StackState::_StackState STATE_VISIT_3  = StackState::STAY;//visit root
+        static const StackState::_StackState END            = StackState::BACK;// back
+    };
 
     template<class T>
     struct CBNode
@@ -94,9 +117,9 @@ namespace DS
         CBNode<T>* m_root;
         FunctorType m_comp;
         void findReplace( CBNode<T>** &p, CBNode<T>** &q );
-        void inOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
-        void preOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
-        void postOrder( const CBNode<T>* pNode, vector<int>* pBuff = nullptr );
+        void inOrder( const CBNode<T>* pNode, vector<int>* pBuff = NULL );
+        void preOrder( const CBNode<T>* pNode, vector<int>* pBuff = NULL );
+        void postOrder( const CBNode<T>* pNode, vector<int>* pBuff = NULL );
 
         public :
 
@@ -108,29 +131,29 @@ namespace DS
         typedef CBTreeGeneralIterator<T,PreOrder> g_pre_order_iterator;
         typedef CBTreeGeneralIterator<T,PostOrder> g_post_order_iterator;
 
+        typedef CBTreeGeneralSpecializationIterator<T,InOrder> g_sp_in_order_iterator;
+        typedef CBTreeGeneralSpecializationIterator<T,PreOrder> g_sp_pre_order_iterator;
+        typedef CBTreeGeneralSpecializationIterator<T,PostOrder> g_sp_post_order_iterator;
+
         typedef std::ptrdiff_t difference_type;
         typedef std::size_t size_type;
         typedef T value_type;
         typedef T* pointer;
         typedef T& reference;
 
+        // GENERAL ITERATORS BY USING GENERALIZED TRAVERSAL IMPLEMENTATION ********************************************
+
         g_in_order_iterator g_in_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-
-                while ( pToNode->children[0] != nullptr )
-                {
-                    pToNode = pToNode->children[0];
-                    ( _stack.top() ).state = StackNode<T>::STAY;
-                    _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                }
-                ( _stack.top() ).state = StackNode<T>::STAY;
+                _stack.push( StackNode<T>( StackState::START, pToNode ) );
             }
-            return CBTreeGeneralIterator<T,InOrder>( _stack );
+            CBTreeGeneralIterator<T,InOrder> it = CBTreeGeneralIterator<T,InOrder>( _stack );
+            ++it;
+            return it;
         }
 
         g_in_order_iterator g_in_end()
@@ -140,13 +163,15 @@ namespace DS
 
         g_pre_order_iterator g_pre_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::STAY, pToNode ) );
+                _stack.push( StackNode<T>( StackState::START, pToNode ) );
             }
-            return CBTreeGeneralIterator<T,PreOrder>( _stack );
+            CBTreeGeneralIterator<T,PreOrder> it = CBTreeGeneralIterator<T,PreOrder>( _stack );
+            ++it;
+            return it;
         }
 
         g_pre_order_iterator g_pre_end()
@@ -156,55 +181,116 @@ namespace DS
 
         g_post_order_iterator g_post_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-
-                while ( pToNode->children[0] != nullptr || pToNode->children[1] != nullptr )
-                {
-                    if ( pToNode->children[0] != nullptr )
-                    {
-                        pToNode = pToNode->children[0];
-                        ( _stack.top() ).state = StackNode<T>::VISIT_LEFT;
-                        _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                    }
-                    else
-                    {
-                        pToNode = pToNode->children[1];
-                        ( _stack.top() ).state = StackNode<T>::VISIT_RIGHT;
-                        _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
-                    }
-                }
-                ( _stack.top() ).state = StackNode<T>::STAY;
+                _stack.push( StackNode<T>( StackState::START, pToNode ) );
             }
-            return CBTreeGeneralIterator<T,PostOrder>( _stack );
+            CBTreeGeneralIterator<T,PostOrder> it = CBTreeGeneralIterator<T,PostOrder>( _stack );
+            ++it;
+            return it;
         }
 
         g_post_order_iterator g_post_end()
         {
             return CBTreeGeneralIterator<T,PostOrder>();
         }
+        // ********************************************************************************************
 
+        // GENERAL ITERATORS USING TEMPLATE SPECIALIZATION ********************************************
 
-
-
-        in_order_iterator in_begin()
+        g_sp_in_order_iterator g_sp_in_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
 
-                while ( pToNode->children[0] != nullptr )
+                while ( pToNode->children[0] != NULL )
                 {
                     pToNode = pToNode->children[0];
-                    ( _stack.top() ).state = StackNode<T>::STAY;
-                    _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                    ( _stack.top() ).state = StackState::STAY;
+                    _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
                 }
-                ( _stack.top() ).state = StackNode<T>::STAY;
+                ( _stack.top() ).state = StackState::STAY;
+            }
+            return CBTreeGeneralSpecializationIterator<T,InOrder>( _stack );
+        }
+
+        g_sp_in_order_iterator g_sp_in_end()
+        {
+            return CBTreeGeneralSpecializationIterator<T,InOrder>();
+        }
+
+        g_sp_pre_order_iterator g_sp_pre_begin()
+        {
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
+            {
+                CBNode<T>* pToNode = m_root;
+                _stack.push( StackNode<T>( StackState::STAY, pToNode ) );
+            }
+            return CBTreeGeneralSpecializationIterator<T,PreOrder>( _stack );
+        }
+
+        g_sp_pre_order_iterator g_sp_pre_end()
+        {
+            return CBTreeGeneralSpecializationIterator<T,PreOrder>();
+        }
+
+        g_sp_post_order_iterator g_sp_post_begin()
+        {
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
+            {
+                CBNode<T>* pToNode = m_root;
+                _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
+
+                while ( pToNode->children[0] != NULL || pToNode->children[1] != NULL )
+                {
+                    if ( pToNode->children[0] != NULL )
+                    {
+                        pToNode = pToNode->children[0];
+                        ( _stack.top() ).state = StackState::VISIT_LEFT;
+                        _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
+                    }
+                    else
+                    {
+                        pToNode = pToNode->children[1];
+                        ( _stack.top() ).state = StackState::VISIT_RIGHT;
+                        _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
+                    }
+                }
+                ( _stack.top() ).state = StackState::STAY;
+            }
+            return CBTreeGeneralSpecializationIterator<T,PostOrder>( _stack );
+        }
+
+        g_sp_post_order_iterator g_sp_post_end()
+        {
+            return CBTreeGeneralSpecializationIterator<T,PostOrder>();
+        }
+
+        // ***************************************************************************************************
+
+        // SIMPLE ITERATORS BY USING AN IMPLEMENTATION FOR EACH ONE ******************************************
+        in_order_iterator in_begin()
+        {
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
+            {
+                CBNode<T>* pToNode = m_root;
+                _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
+
+                while ( pToNode->children[0] != NULL )
+                {
+                    pToNode = pToNode->children[0];
+                    ( _stack.top() ).state = StackState::STAY;
+                    _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
+                }
+                ( _stack.top() ).state = StackState::STAY;
             }
             return CBTreeInOrderIterator<T>( _stack );
         }
@@ -216,11 +302,11 @@ namespace DS
 
         pre_order_iterator pre_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::STAY, pToNode ) );
+                _stack.push( StackNode<T>( StackState::STAY, pToNode ) );
             }
             return CBTreePreOrderIterator<T>( _stack );
         }
@@ -232,28 +318,28 @@ namespace DS
 
         post_order_iterator post_begin()
         {
-            std::stack<StackNode<T>> _stack;
-            if ( m_root != nullptr )
+            std::stack<StackNode<T> > _stack;
+            if ( m_root != NULL )
             {
                 CBNode<T>* pToNode = m_root;
-                _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
 
-                while ( pToNode->children[0] != nullptr || pToNode->children[1] != nullptr )
+                while ( pToNode->children[0] != NULL || pToNode->children[1] != NULL )
                 {
-                    if ( pToNode->children[0] != nullptr )
+                    if ( pToNode->children[0] != NULL )
                     {
                         pToNode = pToNode->children[0];
-                        ( _stack.top() ).state = StackNode<T>::VISIT_LEFT;
-                        _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                        ( _stack.top() ).state = StackState::VISIT_LEFT;
+                        _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
                     }
                     else
                     {
                         pToNode = pToNode->children[1];
-                        ( _stack.top() ).state = StackNode<T>::VISIT_RIGHT;
-                        _stack.push( StackNode<T>( StackNode<T>::VISIT_LEFT, pToNode ) );
+                        ( _stack.top() ).state = StackState::VISIT_RIGHT;
+                        _stack.push( StackNode<T>( StackState::VISIT_LEFT, pToNode ) );
                     }
                 }
-                ( _stack.top() ).state = StackNode<T>::STAY;
+                ( _stack.top() ).state = StackState::STAY;
             }
             return CBTreePostOrderIterator<T>( _stack );
         }
@@ -263,17 +349,19 @@ namespace DS
             return CBTreePostOrderIterator<T>();
         }
 
+        // ***************************************************************************************************
+
         CBTree()
         {
-            m_root = nullptr;
+            m_root = NULL;
         }
 
         bool find( T x, CBNode<T>** &p );
         bool insert( T x );
         bool erase( T x );
-        void inOrderTraverse( vector<int>* pBuff = nullptr );
-        void preOrderTraverse( vector<int>* pBuff = nullptr );
-        void postOrderTraverse( vector<int>* pBuff = nullptr );
+        void inOrderTraverse( vector<int>* pBuff = NULL );
+        void preOrderTraverse( vector<int>* pBuff = NULL );
+        void postOrderTraverse( vector<int>* pBuff = NULL );
     };
 
 }
@@ -283,12 +371,12 @@ bool DS::CBTree<T,FunctorType>::find( T x, CBNode<T>** &p )
 {
     p = &m_root;
 
-    while( ( *p != nullptr ) && ( *p )->data != x )
+    while( ( *p != NULL ) && ( *p )->data != x )
     {
         p = &( ( *p )->children[m_comp( (*p)->data, x ) ? 0 : 1] );
     }
 
-    return ( *p ) != nullptr;
+    return ( *p ) != NULL;
 }
 
 template<class T, class FunctorType>
@@ -315,8 +403,8 @@ bool DS::CBTree<T,FunctorType>::erase( T x )
     }
 
     // Check if case (2)
-    if ( (*p)->children[0] != nullptr &&
-         (*p)->children[1] != nullptr )
+    if ( (*p)->children[0] != NULL &&
+         (*p)->children[1] != NULL )
     {
         CBNode<T>** q;
         std::cout << "finding replace" << std::endl;
@@ -329,7 +417,7 @@ bool DS::CBTree<T,FunctorType>::erase( T x )
     std::cout << "trying to delete" << std::endl;
     // Handle both (1) and (0) cases
     CBNode<T>* t = *p;
-    *p = (*p)->children[ (*p)->children[0] == nullptr ? 1 : 0];
+    *p = (*p)->children[ (*p)->children[0] == NULL ? 1 : 0];
     delete t;
 
     std::cout << "deleted successfully" << std::endl;
@@ -342,7 +430,7 @@ void DS::CBTree<T,FunctorType>::findReplace( CBNode<T>** &p, CBNode<T>** &q )
 {
     int indxChoice = 0;//rand() % 2;
     q = &( (*p)->children[indxChoice] );
-    while ( (*q) != nullptr && (*q)->children[1 - indxChoice] != nullptr ) 
+    while ( (*q) != NULL && (*q)->children[1 - indxChoice] != NULL ) 
     {
         q = &( (*q)->children[1 - indxChoice] );
     }
@@ -351,13 +439,13 @@ void DS::CBTree<T,FunctorType>::findReplace( CBNode<T>** &p, CBNode<T>** &q )
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::inOrderTraverse( vector<int>* pBuff )
 {
-    if ( m_root == nullptr )
+    if ( m_root == NULL )
     {
         return;
     }
 
     inOrder( m_root->children[0], pBuff );
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( m_root->data );
     }
@@ -371,13 +459,13 @@ void DS::CBTree<T,FunctorType>::inOrderTraverse( vector<int>* pBuff )
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::inOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
-    if ( pNode == nullptr )
+    if ( pNode == NULL )
     {
         return;
     }
 
     inOrder( pNode->children[0], pBuff );
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( pNode->data );
     }
@@ -391,12 +479,12 @@ void DS::CBTree<T,FunctorType>::inOrder( const CBNode<T>* pNode, vector<int>* pB
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::preOrderTraverse( vector<int>* pBuff )
 {
-    if ( m_root == nullptr )
+    if ( m_root == NULL )
     {
         return;
     }
 
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( m_root->data );
     }
@@ -411,12 +499,12 @@ void DS::CBTree<T,FunctorType>::preOrderTraverse( vector<int>* pBuff )
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::preOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
-    if ( pNode == nullptr )
+    if ( pNode == NULL )
     {
         return;
     }
 
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( pNode->data );
     }
@@ -431,14 +519,14 @@ void DS::CBTree<T,FunctorType>::preOrder( const CBNode<T>* pNode, vector<int>* p
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::postOrderTraverse( vector<int>* pBuff )
 {
-    if ( m_root == nullptr )
+    if ( m_root == NULL )
     {
         return;
     }
 
     postOrder( m_root->children[0], pBuff );
     postOrder( m_root->children[1], pBuff );
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( m_root->data );
     }
@@ -451,14 +539,14 @@ void DS::CBTree<T,FunctorType>::postOrderTraverse( vector<int>* pBuff )
 template<class T, class FunctorType>
 void DS::CBTree<T,FunctorType>::postOrder( const CBNode<T>* pNode, vector<int>* pBuff )
 {
-    if ( pNode == nullptr )
+    if ( pNode == NULL )
     {
         return;
     }
 
     postOrder( pNode->children[0], pBuff );
     postOrder( pNode->children[1], pBuff );
-    if ( pBuff != nullptr )
+    if ( pBuff != NULL )
     {
         pBuff->push_back( pNode->data );
     }

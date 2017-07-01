@@ -19,6 +19,7 @@ namespace DS
 		
 		N data;
 		vector<Edge*> edges;
+		vector<Edge*> edges_back;
 
 		CNode( N node_data )
 		{

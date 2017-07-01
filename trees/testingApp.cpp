@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
     cout << "-------------------------" << endl;
-    DS::CBTree<int,DS::functors::GreaterThan<int>> myTree;
+    DS::CBTree<int,DS::functors::GreaterThan<int> > myTree;
 
     myTree.insert( 84 );
     myTree.insert( 87 );
@@ -39,7 +39,7 @@ int main()
 
     cout << "inorder-iterators" << endl;
     
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::in_order_iterator it;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::in_order_iterator it;
     
     for( it = myTree.in_begin(); it != myTree.in_end(); ++it )
     {
@@ -52,7 +52,7 @@ int main()
 
     cout << "preorder-iterators" << endl;
 
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::pre_order_iterator it2;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::pre_order_iterator it2;
 
     for( it2 = myTree.pre_begin(); it2 != myTree.pre_end(); ++it2 )
     {
@@ -65,7 +65,7 @@ int main()
 
     cout << "postorder-iterators" << endl;    
 
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::post_order_iterator it3, itDummy;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::post_order_iterator it3, itDummy;
 
     
     for( it3 = myTree.post_begin(); it3 != myTree.post_end(); ++it3 )
@@ -73,20 +73,52 @@ int main()
         cout << ( *it3 ).data << endl;
     }
 
-    cout << "general iterators******" << endl;    
+    cout << "general iterators - specialization******" << endl;    
 
     cout << "in order" << endl;    
 
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_in_order_iterator _g_it_1;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_in_order_iterator _g_sp_it_1;
 
-    for( _g_it_1 = myTree.g_in_begin(); _g_it_1 != myTree.g_in_end(); ++_g_it_1 )
+    for( _g_sp_it_1 = myTree.g_sp_in_begin(); _g_sp_it_1 != myTree.g_sp_in_end(); ++_g_sp_it_1 )
     {
-        cout << ( *_g_it_1 ).data << endl;
+        cout << ( *_g_sp_it_1 ).data << endl;
     }
 
     cout << "pre order" << endl;    
 
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_pre_order_iterator _g_it_2;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_pre_order_iterator _g_sp_it_2;
+
+    for( _g_sp_it_2 = myTree.g_sp_pre_begin(); _g_sp_it_2 != myTree.g_sp_pre_end(); ++_g_sp_it_2 )
+    {
+        cout << ( *_g_sp_it_2 ).data << endl;
+    }
+
+    cout << "post order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_post_order_iterator _g_sp_it_3;
+
+    for( _g_sp_it_3 = myTree.g_sp_post_begin(); _g_sp_it_3 != myTree.g_sp_post_end(); ++_g_sp_it_3 )
+    {
+        cout << ( *_g_sp_it_3 ).data << endl;
+    }
+
+    cout << "general iterators - generalized code ********************" << endl;        
+
+    cout << "in order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_in_order_iterator _g_it_1, _g_it_dummy;
+
+    for( _g_it_1 = myTree.g_in_begin(); _g_it_1 != myTree.g_in_end(); ++_g_it_1 )
+    {
+        // _g_it_dummy = _g_it_1;
+        cout << ( *_g_it_1 ).data << endl;
+        // _g_it_dummy.consume();
+        // cin.get();
+    }
+
+    cout << "pre order" << endl;    
+
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_pre_order_iterator _g_it_2;
 
     for( _g_it_2 = myTree.g_pre_begin(); _g_it_2 != myTree.g_pre_end(); ++_g_it_2 )
     {
@@ -95,20 +127,20 @@ int main()
 
     cout << "post order" << endl;    
 
-    DS::CBTree<int,DS::functors::GreaterThan<int>>::g_post_order_iterator _g_it_3;
+    DS::CBTree<int,DS::functors::GreaterThan<int> >::g_post_order_iterator _g_it_3;
 
     for( _g_it_3 = myTree.g_post_begin(); _g_it_3 != myTree.g_post_end(); ++_g_it_3 )
     {
         cout << ( *_g_it_3 ).data << endl;
     }
 
-    cout << "general iterators******" << endl;        
+    cout << "**********************************************" << endl;        
     
     // TEST CASE FOR RANDOM GENERATED TREES *******************************************************
     // Replace "false" for "true" to test it
-    while( false )
+    while( true )
     {
-        DS::CBTree<int,DS::functors::GreaterThan<int>> _tree;
+        DS::CBTree<int,DS::functors::GreaterThan<int> > _tree;
         int q;
         vector<int> _nums;
         for( q = 0; q < 40; q++ )
@@ -125,13 +157,15 @@ int main()
         cout << endl;
         // checking in-order traversal
         
+        // SIMPLE ITERATORS BY USING AN IMPLEMENTATION FOR EACH ONE ******************************************
+
         {
             vector<int> _order1;
             vector<int> _order2;
             cout << "in-order-recursive" << endl;
             _tree.inOrderTraverse( &_order1 );
             cout << "in-order-iterators" << endl;
-            DS::CBTree<int,DS::functors::GreaterThan<int>>::in_order_iterator _it;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::in_order_iterator _it;
             for( _it = _tree.in_begin(); _it != _tree.in_end(); ++_it )
             {
                 _order2.push_back( ( *_it ).data );
@@ -164,7 +198,7 @@ int main()
             cout << "pre-order-recursive" << endl;
             _tree.preOrderTraverse( &_order1 );
             cout << "pre-order-iterators" << endl;
-            DS::CBTree<int,DS::functors::GreaterThan<int>>::pre_order_iterator _it;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::pre_order_iterator _it;
             for( _it = _tree.pre_begin(); _it != _tree.pre_end(); ++_it )
             {
                 _order2.push_back( ( *_it ).data );
@@ -196,7 +230,7 @@ int main()
             cout << "post-order-recursive" << endl;
             _tree.postOrderTraverse( &_order1 );
             cout << "post-order-iterators" << endl;
-            DS::CBTree<int,DS::functors::GreaterThan<int>>::post_order_iterator _it;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::post_order_iterator _it;
             for( _it = _tree.post_begin(); _it != _tree.post_end(); ++_it )
             {
                 _order2.push_back( ( *_it ).data );
@@ -222,6 +256,208 @@ int main()
 
         }
         
+        // GENERAL ITERATORS BY USING GENERALIZED TRAVERSAL IMPLEMENTATION ********************************************
+
+
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "in-order-recursive" << endl;
+            _tree.inOrderTraverse( &_order1 );
+            cout << "in-order-iterators-general" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_in_order_iterator _it;
+            for( _it = _tree.g_in_begin(); _it != _tree.g_in_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "pre-order-recursive" << endl;
+            _tree.preOrderTraverse( &_order1 );
+            cout << "pre-order-iterators-general" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_pre_order_iterator _it;
+            for( _it = _tree.g_pre_begin(); _it != _tree.g_pre_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+        
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "post-order-recursive" << endl;
+            _tree.postOrderTraverse( &_order1 );
+            cout << "post-order-iterators-general" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_post_order_iterator _it;
+            for( _it = _tree.g_post_begin(); _it != _tree.g_post_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+
+        // GENERAL ITERATORS USING TEMPLATE SPECIALIZATION ********************************************
+
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "in-order-recursive" << endl;
+            _tree.inOrderTraverse( &_order1 );
+            cout << "in-order-iterators-general-specialization" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_in_order_iterator _it;
+            for( _it = _tree.g_sp_in_begin(); _it != _tree.g_sp_in_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "pre-order-recursive" << endl;
+            _tree.preOrderTraverse( &_order1 );
+            cout << "pre-order-iterators-general-specialization" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_pre_order_iterator _it;
+            for( _it = _tree.g_sp_pre_begin(); _it != _tree.g_sp_pre_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+        
+        {
+            vector<int> _order1;
+            vector<int> _order2;
+            cout << "post-order-recursive" << endl;
+            _tree.postOrderTraverse( &_order1 );
+            cout << "post-order-iterators-general-specialization" << endl;
+            DS::CBTree<int,DS::functors::GreaterThan<int> >::g_sp_post_order_iterator _it;
+            for( _it = _tree.g_sp_post_begin(); _it != _tree.g_sp_post_end(); ++_it )
+            {
+                _order2.push_back( ( *_it ).data );
+            }
+            if ( _order2 != _order1 )
+            {
+                cout << "an error occurred here!" << endl;
+                cout << "order1: " << endl;
+                for( q = 0; q < _order1.size(); q++ )
+                {
+                    cout << _order1[q] << " ";
+                }
+                cout << endl;
+                cout << "order2: " << endl;
+                for( q = 0; q < _order2.size(); q++ )
+                {
+                    cout << _order2[q] << " ";
+                }
+                cout << endl;
+
+                break;
+            }
+
+        }
+
+
+
+
+
+
     }
 
     return 0;
