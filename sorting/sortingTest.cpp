@@ -164,31 +164,186 @@ inline void StableSelectSort( RandomAccessIterator start, RandomAccessIterator e
     }
 }
 
-template <typename RandomAccessIterator, typename LessThan>
-void HeapSort_min_heapify( RandomAccessIterator start, RandomAccessIterator, end, RandomAccessIterator pos )
+template <typename RandomAccessIterator>
+void HeapSort_max_heapify( RandomAccessIterator start, RandomAccessIterator end, int pos, int size )
 {
+    /*
+    while ( 2 * pos + 1 <= size )
+    {
+        int j = 2 * pos + 1;
+        if ( j < size && *( start + j ) < *( start + j + 1 ) )
+        {
+            j++;
+        }
+        if ( *( start + pos ) > *( start + j ) )
+        {
+            break;
+        }
+        pos = j;
+    }
+    */
+    /*
+    int l_indx = 2 * pos + 1;
+    int r_indx = 2 * pos + 2;
+
+    int largest_indx;
+
+    if ( l_indx < size && *( start + l_indx ) > *( start + pos ) )
+    {
+        largest_indx = l_indx;
+    }
+    else
+    {
+        largest_indx = pos;
+    }
+
+    if ( r_indx < size && *( start + r_indx ) > *( start + pos ) )
+    {
+        largest_indx = r_indx;
+    }
+
+    if ( largest_indx != pos )
+    {
+        typename RandomAccessIterator::value_type _tmp = *( start + pos );
+        *( start + pos ) = *( start + largest_indx );
+        *( start + largest_indx ) = _tmp;
+        HeapSort_max_heapify<RandomAccessIterator>( start, end, largest_indx, size );
+    }
+    */
+}
+
+template <typename RandomAccessIterator, typename LessThan>
+void HeapSort_build_max_heap( RandomAccessIterator start, RandomAccessIterator end )
+{
+    int N = end - start;
+    int _i;
+    for ( _i = N / 2; _i >= 1; _i-- )
+    {
+        HeapSort_max_heapify<RandomAccessIterator>( start, end, _i, N );
+    }
+}
+
+template <typename RandomAccessIterator, typename LessThan>
+inline void HeapSort( RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan ) 
+{
+    // Adicione el código de Heap Sort, use std::make_heap y std::pop_heap.
+    std::make_heap( start, end );
+    int N = end - start;
+    /*
+    int q = 0;
+    while ( q < N )
+    {
+        // exchange first and last to put the max at the end of the array
+        std::cout << "f: " << *( start ) << std::endl;
+        typename RandomAccessIterator::value_type _tmp = *( start + N - 1 - q );
+        *( start + N - 1 - q ) = *( start );
+        *( start ) = _tmp;
+        HeapSort_max_heapify<RandomAccessIterator>( start, end, 0, N - q );
+        q++;
+        // std::make_heap( start, end - q );
+    }
+    */
+    
+    int q = 0;
+    while ( q < N )
+    {
+        std::pop_heap( start, end - q );
+        q++;
+    }
     
 }
 
-template <typename RandomAccessIterator, typename LessThan>
-void HeapSort_build_min_heap( RandomAccessIterator start, RandomAccessIterator end )
+template<typename RandomAccessIterator, typename LessThan>
+void MergeSort_merge( RandomAccessIterator start, RandomAccessIterator end, 
+                      std::vector<typename RandomAccessIterator::value_type> &pAux, 
+                      int pLo, int pHi, int pMid,
+                      LessThan &lessThan )
 {
+    int q;
+    for ( q = pLo; q <= pHi; q++ )
+    {
+        pAux[q] = *( start + q );
+    }
+
+    int p1 = pLo;
+    int p2 = pMid + 1;
+
+    for ( q = pLo; q <= pHi; q++ )
+    {
+        if ( p1 > pMid )
+        {
+            *( start + q ) = pAux[p2];
+            p2++;
+        }
+        else if ( p2 > pHi )
+        {
+            *( start + q ) = pAux[p1];
+            p1++;
+        }
+        else if ( lessThan( pAux[p2], pAux[p1] ) )
+        {
+            *( start + q ) = pAux[p2];
+            p2++;
+        }
+        else
+        {
+            *( start + q ) = pAux[p1];
+            p1++;
+        }
+    }
 
 }
 
-template <typename RandomAccessIterator, typename LessThan>
-inline void HeapSort(RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan) {
-  // Adicione el código de Heap Sort, use std::make_heap y std::pop_heap.
+template<typename RandomAccessIterator, typename LessThan>
+void MergeSort_sort( RandomAccessIterator start, RandomAccessIterator end, 
+                     std::vector<typename RandomAccessIterator::value_type> &pAux, 
+                     int pLo, int pHi,
+                     LessThan &lessThan )
+{
+    if ( pLo >= pHi )
+    {
+        return;
+    }
+
+    int _mid = ( pLo + pHi ) / 2;
+
+    MergeSort_sort<RandomAccessIterator,LessThan>( start, end, pAux, pLo, _mid, lessThan );
+    MergeSort_sort<RandomAccessIterator,LessThan>( start, end, pAux, _mid + 1, pHi, lessThan );
+    MergeSort_merge<RandomAccessIterator,LessThan>( start, end, pAux, pLo, pHi, _mid, lessThan );
 }
 
 template <typename RandomAccessIterator, typename LessThan>
-inline void MergeSort(RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan) {
-  // Adicione el código de Merge Sort.
+inline void MergeSort( RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan ) 
+{
+    std::vector<typename RandomAccessIterator::value_type> _aux( start, end );
+
+    int lo = 0;
+    int hi = end - start - 1;
+    int mid = ( lo + hi ) / 2;
+
+    MergeSort_sort<RandomAccessIterator, LessThan>( start, end, _aux, lo, mid, lessThan );
+    MergeSort_sort<RandomAccessIterator, LessThan>( start, end, _aux, mid + 1, hi, lessThan );
+    MergeSort_merge<RandomAccessIterator, LessThan>( start, end, _aux, lo, hi, mid, lessThan );
 }
 
 template <typename RandomAccessIterator, typename LessThan>
 inline void IterativeMergeSort(RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan) {
-  // Adicione el código de Merge Sort.
+    int _curr_size;
+    int _left_start;
+    int N = end - start;
+
+    std::vector<typename RandomAccessIterator::value_type> _aux( start, end );
+
+    for ( _curr_size = 1; _curr_size <= N - 1; _curr_size = 2 * _curr_size )
+    {
+        for ( _left_start = 0; _left_start < N - 1; _left_start += 2 * _curr_size )
+        {
+            int _mid = _left_start + _curr_size - 1;
+
+            int _right_end = std::min( _left_start + 2 * _curr_size - 1, N - 1 );
+            MergeSort_merge<RandomAccessIterator, LessThan>( start, end, _aux, _left_start, _right_end, _mid, lessThan );
+        }
+    }
 }
 
 template <typename RandomAccessIterator, typename LessThan>
@@ -232,7 +387,7 @@ int main( int argc, char** argv )
         }
         // retire el comentario para estudiar datos completamente desordenados:
         std::shuffle (w.begin(), w.end(), std::default_random_engine(std::time(0)));
-        std::vector<SORT_ALGORITHM> sort_algorithms = {InsertSort, SelectSort, StableSelectSort/*, HeapSort, MergeSort, IterativeMergeSort, LomutoQuickSort, HoareQuickSort*/ };
+        std::vector<SORT_ALGORITHM> sort_algorithms = {InsertSort, SelectSort, StableSelectSort, HeapSort, MergeSort, IterativeMergeSort/*, LomutoQuickSort, HoareQuickSort*/ };
         if ( i > 100000 && i < 100000000)
         {
             sort_algorithms = {HeapSort, MergeSort, IterativeMergeSort, LomutoQuickSort, HoareQuickSort };
