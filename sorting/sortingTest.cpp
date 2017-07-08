@@ -501,7 +501,7 @@ int main( int argc, char** argv )
                                                         HoareQuickSort, 
                                                         LomutoQuickSort, 
                                                         YaroslavskiyQuickSort };
-        if ( i >= 100000 && i < 100000000)
+        if ( i > 100000 && i < 100000000)
         {
             sort_algorithms = { HeapSort, 
                                 MergeSort, 
