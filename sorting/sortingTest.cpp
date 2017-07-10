@@ -26,63 +26,63 @@ struct cmpGreater
 template <typename RandomAccessIterator>
 inline void InsertSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     InsertSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void SelectSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     SelectSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void StableSelectSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     StableSelectSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void HeapSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     HeapSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void MergeSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     MergeSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void IterativeMergeSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     IterativeMergeSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void LomutoQuickSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     LomutoQuickSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void HoareQuickSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     HoareQuickSort( start, end, lessThan );
 }
 
 template <typename RandomAccessIterator>
 inline void YaroslavskiyQuickSort( RandomAccessIterator start, RandomAccessIterator end ) 
 {
-    cmpLess < typename RandomAccessIterator::value_type > lessThan;
+    cmpGreater < typename RandomAccessIterator::value_type > lessThan;
     YaroslavskiyQuickSort( start, end, lessThan );
 }
 
@@ -167,14 +167,13 @@ inline void StableSelectSort( RandomAccessIterator start, RandomAccessIterator e
 template <typename RandomAccessIterator, typename LessThan>
 inline void HeapSort( RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan ) 
 {
-    // Adicione el código de Heap Sort, use std::make_heap y std::pop_heap.
-    std::make_heap( start, end );
+    std::make_heap( start, end, lessThan );
     int N = end - start;
     
     int q = 0;
     while ( q < N )
     {
-        std::pop_heap( start, end - q );
+        std::pop_heap( start, end - q, lessThan );
         q++;
     }
     
@@ -312,7 +311,6 @@ void LomutoSort( RandomAccessIterator start, RandomAccessIterator end, int lo, i
 template <typename RandomAccessIterator, typename LessThan>
 inline void LomutoQuickSort(RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan) 
 {
-    std::random_shuffle( start, end );
     int N = end - start;
     LomutoSort<RandomAccessIterator, LessThan>( start, end, 0, N - 1, lessThan );
 }
@@ -376,73 +374,94 @@ void HoareSort( RandomAccessIterator start, RandomAccessIterator end, int lo, in
 template <typename RandomAccessIterator, typename LessThan>
 inline void HoareQuickSort(RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan) 
 {
-    std::shuffle( start, end, std::default_random_engine(std::time(0)) );
     int N = end - start;
     HoareSort<RandomAccessIterator, LessThan>( start, end, 0, N - 1, lessThan );
 }
 
 
 template<typename RandomAccessIterator, typename LessThan>
-int YaroslavskiyPartition( RandomAccessIterator start, RandomAccessIterator end, int lo, int hi, LessThan &lessThan )
+void YaroslavskiyPartition( RandomAccessIterator start, RandomAccessIterator end, int lo, int hi, int &mid_1, int &mid_2, LessThan &lessThan )
 {
-    int i = lo + 1, j = hi;
-    while ( true )
+
+    int p1 = *( start + lo );
+    int p2 = *( start + hi );
+
+    if ( !lessThan( p1, p2 ) )
     {
-        while ( lessThan( *( start + i ), *( start + lo )  ) )
-        {
-            i++;
-            if ( i == hi )
-            {
-                break;
-            }
-        }
-
-        while ( lessThan( *( start + lo ) , *( start + j ) ) )
-        {
-            j--;
-            if ( j == lo )
-            {
-                break;
-            }
-        }
-
-        if ( i >= j )
-        {
-            break;
-        }
-
-        // exchange i and j
-        typename RandomAccessIterator::value_type _tmp = *( start + i );
-        *( start + i ) = *( start + j );
-        *( start + j ) = _tmp;
+        typename RandomAccessIterator::value_type _tmp = *( start + lo );
+        *( start + lo ) = *( start + hi );
+        *( start + hi ) = _tmp;
+        p1 = *( start + lo );
+        p2 = *( start + hi );
     }
 
-    // exchange lo and j
-    typename RandomAccessIterator::value_type _tmp = *( start + lo );
-    *( start + lo ) = *( start + j );
-    *( start + j ) = _tmp;
+    int l, k, g;
+    l = lo + 1;
+    k = lo + 1;
+    g = hi - 1;
 
-    return j;
+    while ( k <= g )
+    {
+        if ( lessThan( *( start + k ), p1 ) )
+        {
+            typename RandomAccessIterator::value_type _tmp = *( start + l );
+            *( start + l ) = *( start + k );
+            *( start + k ) = _tmp;
+            l++;
+            k++;
+        }
+        else if ( lessThan( p2, *( start + k ) )  )
+        {
+            typename RandomAccessIterator::value_type _tmp = *( start + k );
+            *( start + k ) = *( start + g );
+            *( start + g ) = _tmp;
+            g--;
+        }
+        else
+        {
+            k++;
+        }
+    
+    }
+
+    // exchange lo and l
+    typename RandomAccessIterator::value_type _tmp = *( start + lo );
+    *( start + lo ) = *( start + l - 1 );
+    *( start + l - 1 ) = _tmp;    
+
+    mid_1 = l - 1;
+
+    // exchange hi and k
+    _tmp = *( start + hi );
+    *( start + hi ) = *( start + g + 1 );
+    *( start + g + 1 ) = _tmp;    
+
+    mid_2 = g + 1;
 }
 
 template <typename RandomAccessIterator, typename LessThan>
 void YaroslavskiySort( RandomAccessIterator start, RandomAccessIterator end, int lo, int hi, LessThan &lessThan )
 {
+
     if ( hi <= lo )
     {
         return;
     }
-
-    int _mid = YaroslavskiyPartition<RandomAccessIterator, LessThan>( start, end, lo, hi, lessThan );
-    YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, lo, _mid - 1, lessThan );
-    YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, _mid + 1, hi, lessThan );
+    int _mid_1;
+    int _mid_2;
+    YaroslavskiyPartition<RandomAccessIterator, LessThan>( start, end, lo, hi, _mid_1, _mid_2, lessThan );
+    YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, lo, _mid_1 - 1, lessThan );
+    if ( lessThan( *( start + _mid_1 ), *( start + _mid_2 ) ) )
+    {
+      YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, _mid_1 + 1, _mid_2 - 1, lessThan );
+    }
+    YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, _mid_2 + 1, hi, lessThan );
 }
 
 
 template <typename RandomAccessIterator, typename LessThan>
 inline void YaroslavskiyQuickSort( RandomAccessIterator start, RandomAccessIterator end, LessThan &lessThan ) 
 {
-    std::shuffle( start, end, std::default_random_engine( std::time( 0 ) ) );
     int N = end - start;
     YaroslavskiySort<RandomAccessIterator, LessThan>( start, end, 0, N - 1, lessThan );
 }
@@ -462,7 +481,7 @@ void print( std::vector<int> vect )
 int main( int argc, char** argv ) 
 {
     typedef void ( *SORT_ALGORITHM )( std::vector<int>::iterator, std::vector<int>::iterator );
-    for ( auto & i : { 100/*,1000,10000,100000,1000000,10000000,100000000*/ } )
+    for ( auto & i : { 100,1000,10000,100000,1000000,10000000,100000000 } )
     {
         std::vector<int> w(i), v;
         std::iota( w.begin(), w.end(), 1 );
@@ -473,23 +492,39 @@ int main( int argc, char** argv )
         }
         // retire el comentario para estudiar datos completamente desordenados:
         std::shuffle (w.begin(), w.end(), std::default_random_engine(std::time(0)));
-        std::vector<SORT_ALGORITHM> sort_algorithms = {InsertSort, SelectSort, StableSelectSort, HeapSort, MergeSort, IterativeMergeSort, HoareQuickSort, LomutoQuickSort, YaroslavskiyQuickSort };
+        std::vector<SORT_ALGORITHM> sort_algorithms = { InsertSort, 
+                                                        SelectSort, 
+                                                        StableSelectSort, 
+                                                        HeapSort, 
+                                                        MergeSort, 
+                                                        IterativeMergeSort, 
+                                                        HoareQuickSort, 
+                                                        LomutoQuickSort, 
+                                                        YaroslavskiyQuickSort };
         if ( i > 100000 && i < 100000000)
         {
-            sort_algorithms = {HeapSort, MergeSort, IterativeMergeSort, LomutoQuickSort, HoareQuickSort };
+            sort_algorithms = { HeapSort, 
+                                MergeSort, 
+                                IterativeMergeSort, 
+                                LomutoQuickSort, 
+                                HoareQuickSort, 
+                                YaroslavskiyQuickSort };
             std::cout << "-, -, -, ";
         }
         if (i == 100000000)
         {
-            sort_algorithms = {IterativeMergeSort, LomutoQuickSort, HoareQuickSort };
+            sort_algorithms = { IterativeMergeSort, 
+                                LomutoQuickSort, 
+                                HoareQuickSort, 
+                                YaroslavskiyQuickSort };
             std::cout << "-, -, -, -, -, ";
         }
         for ( auto & sort_algorithm : sort_algorithms){
             v=w;
             std::clock_t inicio = std::clock();
-            print( v );
+            // print( v );
             sort_algorithm(v.begin(),v.end());
-            print( v );
+            // print( v );
             std::cout << 1000.0 * (double)(std::clock()-inicio)/(double)CLOCKS_PER_SEC << ", " << std::endl;
         }
         std::cout << std::endl;
